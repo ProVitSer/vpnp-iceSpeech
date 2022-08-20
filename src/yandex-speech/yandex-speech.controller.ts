@@ -5,6 +5,7 @@ import { Response } from 'express'
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
+import { YandexSpeechFileDto } from './dto/yandex-speech-file.dto';
 
 
 @Controller('yandex-speech')
@@ -27,7 +28,7 @@ export class YandexSpeechController {
     }
 
     @Get('files')
-    async getConvertFiles(  @Res() res: Response): Promise<any> {
+    async getConvertFiles( @Res() res: Response): Promise<any> {
         try {
             const response = await this.ya.getAllTTSConvertFiles();
             return res.status(HttpStatus.OK).json(response);
@@ -36,12 +37,16 @@ export class YandexSpeechController {
         } 
     }
 
-    @Get('files')
-    async getConvertFile( @Query('originFileName') originFileName: string, @Res() res: Response): Promise<any> {
+    @Get('file')
+    async getConvertFile( @Body() body: YandexSpeechFileDto, @Res() res: Response): Promise<any> {
         try {
-            const fileName = await this.ya.getAllTTSConvertFiles();
-            const file = createReadStream(`${join(__dirname, '..' , this.configService.get('projectDir.voiceFileDir'))}${fileName}`);
-            file.pipe(res);
+            const fileName = await this.ya.getTTSConvertFile(body.originFileName);
+            if(!!fileName.length){
+                const file = createReadStream(`${join(__dirname, '..' , this.configService.get('projectDir.voiceFileDir'))}${fileName}`);
+                file.pipe(res);
+            } else {
+                return res.status(HttpStatus.NOT_FOUND).json();
+            }
         }catch(e){
             throw e;
         } 

@@ -7,7 +7,7 @@ import configuration from '@app/config/config.provides';
 
 async function bootstrap() {
   const config = new ConfigService(configuration());
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger: ['error', 'warn'] });
   app.useStaticAssets(join(__dirname, '..' ,'public'));
   await app.listen(config.get('appPort'));
 }
