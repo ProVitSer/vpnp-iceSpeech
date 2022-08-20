@@ -41,3 +41,4 @@ dist
 api-log
 config.json
 csv
+public/voice*
