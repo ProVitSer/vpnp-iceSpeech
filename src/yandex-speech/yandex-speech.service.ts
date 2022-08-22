@@ -1,29 +1,27 @@
-import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { HttpStatus, Injectable, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { YandexSpeech, YandexSpeechData, YandexTTSSaveConvertFile, YandexTTSSaveConvertFiles } from './interfaces/interface';
 import { YandexSpeechDefaultSetting } from './interfaces/config';
 import { URLSearchParams } from "url"
-import { writeFile, readFile } from 'fs/promises';
 import  { AxiosResponse, AxiosError } from 'axios';
-import * as fs from 'fs';
-import { join } from 'path';
 import * as uuid from "uuid";
 import * as moment from 'moment';
 import { YandexSpeechIAMToken } from './yandex-speech-iamtoken';
 import { UtilsService } from '@app/utils/utils.service';
+import { LoggerService } from '@app/logger/logger.service';
 
 
 
 @Injectable()
 export class YandexSpeechService implements OnModuleInit{
-    private readonly logger = new Logger(YandexSpeechService.name);
 
     constructor(
         private readonly configService: ConfigService,
         private readonly httpService: HttpService,
         private readonly iamToken: YandexSpeechIAMToken,
-        private readonly utils: UtilsService
+        private readonly utils: UtilsService,
+        private readonly logger: LoggerService
     ){
         const axios = this.httpService.axiosRef;
         const iam = this.iamToken;
@@ -64,7 +62,7 @@ export class YandexSpeechService implements OnModuleInit{
         try {
             return await this.getVoicesFilesName();
         }catch(e){
-            this.logger.error(`Error get all convert files from db: ${e}`)
+            this.logger.error(`Error get all convert files from voiceDataDir: ${e}`)
             throw e;
         }
     }
@@ -77,7 +75,18 @@ export class YandexSpeechService implements OnModuleInit{
             });
             return (fileInfo.length != 0)? fileInfo[0].saveFileName :  "";
         }catch(e){
-            this.logger.error(`Error get all convert files from db: ${e}`)
+            this.logger.error(`Error get all convert files from voiceDataDir: ${e}`)
+            throw e;
+        }
+    }
+
+    public async deleteTTSConvertFile(fileName: string): Promise<any>{
+        try {
+            const files = await this.getVoicesFilesName();
+            const newFiles = files.data.filter((file: YandexTTSSaveConvertFile) => file.originFileName != fileName)
+            await this.utils.writeToVoiceFileData(newFiles);
+        } catch(e){
+            this.logger.error(`Error delete file from voiceDataDir: ${e}`)
             throw e;
         }
     }
@@ -99,7 +108,7 @@ export class YandexSpeechService implements OnModuleInit{
     }
 
     private async getVoicesFilesName(): Promise<YandexTTSSaveConvertFiles>{
-        const files: YandexTTSSaveConvertFiles = JSON.parse((await readFile(`${join(__dirname, '..' , this.configService.get('projectDir.voiceDataDir'))}/voiceFile.json`)).toString());
+        const files: YandexTTSSaveConvertFiles = await this.utils.getVoiceFileData();
         return files;
     }
 
@@ -108,11 +117,11 @@ export class YandexSpeechService implements OnModuleInit{
         const info: YandexTTSSaveConvertFile = {
             originFileName: await this.checkFileName(userFileName),
             saveFileName: voiceFile,
-            date: moment().format('YYYY-MM-DDTHH:mm:ss')
+            date: moment().format('YYYY-MM-DD HH:mm:ss')
         }
         const files = await this.getVoicesFilesName();
         files.data.push(info)
-        await writeFile(`${join(__dirname, '..' , this.configService.get('projectDir.voiceDataDir'))}/voiceFile.json`, JSON.stringify({ data: files.data }));
+        await this.utils.writeToVoiceFileData(files.data);;
     }
 
     private async checkFileName(userFileName: string): Promise<string>{
@@ -121,7 +130,7 @@ export class YandexSpeechService implements OnModuleInit{
     }
 
     private async saveTTSFile(response: AxiosResponse, voiceFile: string){
-        let writer = fs.createWriteStream(`${join(__dirname, '..' , this.configService.get('projectDir.voiceFileDir'))}${voiceFile}`);
+        let writer = this.utils.writeStreamVoiceFile(voiceFile);
         return new Promise((resolve, reject) => {
             response.data.pipe(writer);
             let error = null;

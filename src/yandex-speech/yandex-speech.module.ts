@@ -6,11 +6,13 @@ import { HttpModule } from "@nestjs/axios";
 import axios, { HttpService } from '@nestjs/axios';
 import { YandexSpeechIAMToken } from './yandex-speech-iamtoken';
 import { UtilsModule } from '@app/utils/utils.module';
+import { LoggerModule } from '@app/logger/logger.module';
 
 @Module({
   imports: [
     ConfigModule,
     UtilsModule,
+    LoggerModule,
     HttpModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

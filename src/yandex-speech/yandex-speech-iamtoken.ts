@@ -19,18 +19,16 @@ export class YandexSpeechIAMToken implements OnModuleInit {
 
     public async refreshIAMToken(): Promise<string>{
         try {
-            let token = await new Promise<string>(function (resolve, reject) {
+            const token = await new Promise<string>(function (resolve, reject) {
                 exec("yc iam create-token", (error, stdout, stderr) => {
                     if(!!stdout){
-                        resolve(stdout)
+                        resolve(stdout.replace(/\n/g, ''))
                     }
                     reject()
                 });
             });
-            token = token.replace(/\n/g, '');
             await this.saveToken(token);
             this.logger.log(`New token generate: ${token}`)
-
             return token;
         } catch(e){
             this.logger.error(`Refresh Token error: ${e}`)
