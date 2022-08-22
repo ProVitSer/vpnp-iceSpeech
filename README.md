@@ -2,8 +2,8 @@
 
 На скорую руку сделанный back\front для взаимодействия с Yandex API SpeechKit для преобразования текста в голос.
 
-![alt text](https://ibb.co/4FzPmKY)
-![alt text](https://ibb.co/F4wN9vs)
+![alt text](https://i.ibb.co/vcpZwVQ/page-1.png)
+![alt text](https://i.ibb.co/N2jQXh1/page-2.png)
 
 
 ## Tech
