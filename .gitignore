@@ -43,4 +43,5 @@ config.json
 voiceFile.json
 token.json
 csv
-public/voice*
+public/voice/*
+public/node_modules
