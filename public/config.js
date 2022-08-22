@@ -1,2 +1,2 @@
-const host = 'HOST_AND_PORT_BACKEND';
+const host = 'localhost:7789';
 module.exports = host;

@@ -40,8 +40,8 @@ lerna-debug.log*
 dist
 api-log
 config.json
-voiceFile.json
 token.json
+voiceFile.json
 csv
 public/voice/*
 public/node_modules
