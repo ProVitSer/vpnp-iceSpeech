@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { writeFile, readFile } from 'fs/promises';
+import { writeFile, readFile, unlink, readdir } from 'fs/promises';
 import { join } from 'path';
-import { access, constants } from 'fs';
+import { access, constants, createReadStream, createWriteStream } from 'fs';
+import { YandexTTSSaveConvertFile, YandexTTSSaveConvertFiles } from '@app/yandex-speech/interfaces/interface';
 
 
 @Injectable()
@@ -29,5 +30,29 @@ export class UtilsService {
                 }
             })
         }) 
+    }
+
+    public readStreamVoiceFile(fileName: string){
+        return createReadStream(`${join(__dirname, '..' , this.configService.get('projectDir.voiceFileDir'))}${fileName}`);
+    }
+
+    public writeStreamVoiceFile(fileName: string){
+        return createWriteStream(`${join(__dirname, '..' , this.configService.get('projectDir.voiceFileDir'))}${fileName}`);
+    }
+
+    public async writeToVoiceFileData(newData: YandexTTSSaveConvertFile[]){
+        writeFile(`${join(__dirname, '..' , this.configService.get('projectDir.voiceDataDir'))}/voiceFile.json`, JSON.stringify({ data: newData }));
+    }
+
+    public async getVoiceFileData(): Promise<YandexTTSSaveConvertFiles>{
+        return JSON.parse((await readFile(`${join(__dirname, '..' , this.configService.get('projectDir.voiceDataDir'))}/voiceFile.json`)).toString());
+    }
+    
+    public async deleteVoiceFile(fileName: string){
+        return await unlink(`${join(__dirname, '..' , this.configService.get('projectDir.voiceFileDir'))}${fileName}`)
+    }
+
+    public async getSaveVoiceFile(){
+        return await readdir(`${join(__dirname, '..' , this.configService.get('projectDir.voiceFileDir'))}`)
     }
 }
