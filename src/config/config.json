@@ -1,0 +1,30 @@
+{
+    "appProtocol": "http",
+    "appUrl": "localhost",
+    "appPort": 7789,
+    "cors": {
+        "origin": "*",
+        "methods": "GET,POST,DELETE,OPTIONS",
+        "allowedHeaders": "Content-Type, Accept"
+
+    },
+    "security": {
+        "ipWhiteList": "*"
+    },
+    "log": {
+        "path": "./api-log/",
+        "formatDate": "YYYY-MM-DD",
+        "mixSize": "20m",
+        "maxFiles": "14d"
+    },
+    "yandex": {
+        "ttsUrl": "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize",
+        "folderId": "YEANDEX_FOLDER_ID",
+        "tokenFolder": "../src/config"
+    },
+    "deleteNoUseVoice": true,
+    "projectDir": {
+        "voiceFileDir": "../public/voice/",
+        "voiceDataDir": "../src/config"
+    }
+}

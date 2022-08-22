@@ -1,1 +1,2 @@
-const host = '80.249.144.42:7789';
+const host = 'HOST_AND_PORT_BACKEND';
+module.exports = host;
